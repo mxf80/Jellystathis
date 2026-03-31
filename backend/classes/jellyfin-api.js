@@ -638,8 +638,6 @@ class JellyfinAPI {
       return {};
     }
   }
-}
-
 async getItemPoster(itemId) {
   if (!this.configReady) {
     return null;
@@ -661,6 +659,8 @@ async getItemPoster(itemId) {
     this.#errorHandler(error, `getItemPoster ${itemId}`);
     return null;
   }
+}
+  
 }
 
 module.exports = JellyfinAPI;
