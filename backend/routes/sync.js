@@ -16,6 +16,7 @@ const TaskManager = require("../classes/task-manager-singleton");
 const TaskScheduler = require("../classes/task-scheduler-singleton");
 
 const router = express.Router();
+router.use("/posters", express.static(require("path").join(__dirname, "../../posters")));
 
 const { jf_libraries_columns, jf_libraries_mapping } = require("../models/jf_libraries");
 const { jf_library_items_columns, jf_library_items_mapping } = require("../models/jf_library_items");
