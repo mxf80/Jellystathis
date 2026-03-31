@@ -190,15 +190,49 @@ async function syncLibraryFolders(data, existing_excluded_libraries) {
   }
   syncTask.loggedData.push({ color: "yellow", Message: "Library Sync Complete" });
 }
+
 async function syncLibraryItems(data) {
   const _sync = new sync();
-  const existingLibraryIds = await _sync.getExistingIDsforTable("jf_libraries"); // get existing library Ids from the db
+  const existingLibraryIds = await _sync.getExistingIDsforTable("jf_libraries");
 
   data = data.filter((row) => existingLibraryIds.includes(row.ParentId));
 
   const existingIds = await _sync.getExistingIDsforTable("jf_library_items");
 
-  let dataToInsert = await data.map(jf_library_items_mapping);
+  let dataToInsert = [];
+
+  for (const item of data) {
+    if (!item.Id) continue;
+
+    const mapped = jf_library_items_mapping(item);
+
+    // 👉 качаємо постер
+    try {
+      const poster = await API.getItemPoster(item.Id);
+
+      if (poster) {
+        const fs = require("fs");
+        const path = require("path");
+
+        const dir = path.join(__dirname, "../../posters");
+
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+
+        const filePath = path.join(dir, `${item.Id}.jpg`);
+
+        fs.writeFileSync(filePath, poster);
+
+        mapped.PosterPath = `/posters/${item.Id}.jpg`;
+      }
+    } catch (err) {
+      console.log("Poster error:", item.Id);
+    }
+
+    dataToInsert.push(mapped);
+  }
+
   dataToInsert = dataToInsert.filter((item) => item.Id !== undefined);
 
   if (syncTask.taskName === taskName.partialsync) {
@@ -211,7 +245,9 @@ async function syncLibraryItems(data) {
 
   return {
     insertedItemsCount:
-      syncTask.taskName === taskName.partialsync ? dataToInsert.length : Math.max(dataToInsert.length - existingIds.length, 0),
+      syncTask.taskName === taskName.partialsync
+        ? dataToInsert.length
+        : Math.max(dataToInsert.length - existingIds.length, 0),
     updatedItemsCount: syncTask.taskName === taskName.partialsync ? 0 : existingIds.length,
   };
 }
