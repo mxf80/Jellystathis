@@ -147,7 +147,7 @@ function LibraryCard(props) {
                <Card.Img
                variant="top"
                className="library-card-banner library-card-banner-hover"
-               src={baseUrl+"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
+               src={props.data.PosterPath ? props.data.PosterPath : baseUrl+"/proxy/Items/Images/Primary?id=" + props.data.Id + "&fillWidth=800&quality=50"}
                onError={() =>setImageLoaded(false)}
                />
                :
