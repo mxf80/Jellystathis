@@ -640,4 +640,27 @@ class JellyfinAPI {
   }
 }
 
+async getItemPoster(itemId) {
+  if (!this.configReady) {
+    return null;
+  }
+
+  try {
+    const url = `${this.config.JF_HOST}/Items/${itemId}/Images/Primary`;
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: 'MediaBrowser Token="' + this.config.JF_API_KEY + '"',
+        "User-Agent": this.userAgent,
+      },
+      responseType: "arraybuffer",
+    });
+
+    return response.data;
+  } catch (error) {
+    this.#errorHandler(error, `getItemPoster ${itemId}`);
+    return null;
+  }
+}
+
 module.exports = JellyfinAPI;
